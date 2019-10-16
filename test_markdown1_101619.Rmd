@@ -96,7 +96,7 @@ p + geom_histogram(aes(y = ..density..),fill,size=3,binwidth=0.2) +geom_density(
 
 ### Scatter Plot
 
-The Scatter plots of Sepal Length vs Sepal Width and Petal Length vs Petal Width below provides the information on how the length is affected by the width and vice versa. The green line shows the linear trend and greay area around the green line gives the confidence region.
+The Scatter plots of Sepal Length vs Sepal Width and Petal Length vs Petal Width below provides the information on how the length is affected by the width and vice versa. The green line shows the linear trend and greay area around the green line gives the confidence region 101.
 
 ```{r read8, echo=FALSE, include=TRUE,message=FALSE}
 g <- ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) 
