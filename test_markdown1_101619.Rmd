@@ -1,0 +1,106 @@
+---
+title: ' Test Project Git '
+author: 'Sridhar Tutika'
+date: '10/16/2019'
+output:  
+  html_document:  
+    theme: default
+    toc: TRUE
+    toc_float: FALSE  
+    toc_depth: 3  
+---
+```{r setup, include=FALSE, echo=TRUE}
+library(ggplot2)
+library(dplyr)
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, warning = FALSE)  
+```
+# Iris Data Set
+## Introduction
+The **Iris flower data set** or **Fisher's Iris data set** is a multivariate data set introduced by the British statistician and biologist Ronald Fisher in his 1936 paper _The use of multiple measurements in taxonomic problems_ as an example of [linear discriminant analysis]( http://wikipedia.org/wiki/Linear_discriminant_analysis).
+
+```{r pic, echo=FALSE}  
+knitr::include_graphics("fisher.JPG")
+```
+```{r read1, echo=FALSE, include=TRUE,message=FALSE}
+library(Lahman)
+library(tidyverse)
+library(dplyr)
+library(readr)
+library(haven)
+library(readxl)
+library(DT)
+dplyr::tbl_df(iris) %>% head(6) %>% knitr::kable(caption = "Preview of Iris Data")
+```
+
+```{r funIQR, echo=FALSE, include=TRUE}
+# Function to calculate interquartile range; na and NaN's are not taken into consideration
+# If the argument is a tibble or a dataframe, extract the first column and pass else use the input as is
+getIQR <- function(input1)
+{
+  subset1 <- filter(iris, Species == input1) %>% select (Sepal.Length:Petal.Width)
+  p <- as.numeric(gsub('.*:', '', summary(subset1)))
+  q <- data.frame(subset1[0,])
+  attributes(q)$row.names[1] <- "Min."
+  attributes(q)$row.names[2] <- "1st Qu."
+  attributes(q)$row.names[3] <- "Median"
+  attributes(q)$row.names[4] <- "Mean"
+  attributes(q)$row.names[5] <- "3rd Qu."
+  attributes(q)$row.names[6] <- "Max."
+  q$Sepal.Length <- p[1:6]
+  q$Sepal.Width <- p[7:12]
+  q$Petal.Length <- p[13:18]
+  q$Petal.Width <- p[19:24]
+  text1 <- paste("Summary of Species", input1)
+  r <- knitr::kable(q,digits=1,caption=text1)
+  return (r)
+}
+```
+## Numeric Summaries by Species
+The tables below provide summary statistics for each of the species in Iris data. These statistics include
+Maximum, Minimum, Mean, Median, 1st and 3rd Quartile of each measurement of the Sepal and Petal.
+
+```{r read22, echo=FALSE, include=TRUE,message=FALSE}
+# Call the function getIQR to get the summary stats for for each of the species
+s1 <- getIQR("setosa")
+s1
+s2 <- getIQR("versicolor")
+s2
+s3 <- getIQR("virginica")
+s3
+```
+
+## Visuals
+### Boxplot for Comparison
+
+Below two box plots describe the five number summary min, Q1, median, Q3 and max for Sepal length and Sepal Width of Iris species. The scatter plot of Sepal Length and width have been super imposed on top of the box plots.
+
+As we observe, the lowest Sepal length of virginica species is an outlier that is way lower than than the second lowest and so it is far from the bottom stem of the box plot. We can see similar instances in Sepal Width box plot where setosa and virginica  minimum and maximum Sepal width are outliers.
+
+```{r read6, echo=FALSE, include=TRUE,message=FALSE}
+g <- ggplot(iris, aes(x = Species, y = Sepal.Length),alpha = 0.6, size = 0.8, position = "jitter")
+g + geom_boxplot() + geom_jitter(aes(colour = Species)) + ggtitle("Boxplot for Sepal Length")
+g <- ggplot(iris, aes(x = Species, y = Sepal.Width),alpha = 0.6, size = 0.8, position = "jitter")
+g + geom_boxplot() + geom_jitter(aes(colour = Species)) + ggtitle("Boxplot for Sepal Width")
+```
+
+### Multiple Distributions Present
+
+The histogram for sepal length below provides the density distribution of Iris Sepal Length accross all the species. The Kernel (red line) determines the weight given to nearby points. The second histogram for sepal length breaks up the information for each of the Iris Species.
+
+```{r read7, echo=FALSE, include=TRUE,message=FALSE}
+g <- ggplot(iris, aes(x = Sepal.Length)) 
+g + geom_histogram(aes(y = ..density..),fill,size=3,binwidth=0.25) +geom_density(adjust = 0.4, alpha = 0.5,size=3,color="red",position = "stack") + ggtitle("Histogram for Sepal Length")
+p <- ggplot(iris, aes(x = Sepal.Length)) 
+p + geom_histogram(aes(y = ..density..),fill,size=3,binwidth=0.2) +geom_density(alpha = 0.5,size=2,color="red",position = "stack")+facet_wrap(iris$Species) + ggtitle("Histogram for Sepal Length")
+```
+
+### Scatter Plot
+
+The Scatter plots of Sepal Length vs Sepal Width and Petal Length vs Petal Width below provides the information on how the length is affected by the width and vice versa. The green line shows the linear trend and greay area around the green line gives the confidence region.
+
+```{r read8, echo=FALSE, include=TRUE,message=FALSE}
+g <- ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) 
+g +  geom_point(aes(colour = Species))+ geom_smooth(aes(group=Species),method = lm, col = "Green") + ggtitle("Sepal Length vs Sepal Width")
+p <- ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) 
+p +  geom_point(aes(colour = Species))+ geom_smooth(aes(group=Species),method = lm, col = "Green") + ggtitle("Petal Length vs Petal Width")
+```
